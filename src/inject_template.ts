@@ -111,12 +111,11 @@ export const entryServiceWorker = ({
             u.pathname +
             u.search
         );
-      ev.respondWith(
-        fetch(realProxyUrl, {
-          ...ev.request,
-          headers: proxyHeader,
-        })
-      );
+      const req: RequestInit = {
+        headers: proxyHeader,
+      };
+      Object.assign(req, ev.request);
+      ev.respondWith(fetch(realProxyUrl, req));
     }
   });
 };
