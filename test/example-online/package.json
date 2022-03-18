@@ -8,6 +8,6 @@
   },
   "devDependencies": {
     "vite": "^2.8.6",
-    "vite-plugin-switch-hosts": "^0.0.1"
+    "vite-plugin-switch-hosts": "^0.0.2"
   }
 }
