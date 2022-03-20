@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-switch-hosts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "vite-plugin-switch-hosts",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -62,7 +62,7 @@
     "vite": "^2.0.0"
   },
   "engines": {
-    "pnpm": "^6.26.1",
+    "pnpm": "^6.0.0",
     "yarn": "forbidden, use pnpm",
     "npm": "forbidden, use pnpm",
     "node": "^14.13.1 || >= 16"
