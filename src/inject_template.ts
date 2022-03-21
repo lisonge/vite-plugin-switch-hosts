@@ -2,17 +2,16 @@ export const template2string = <T extends (args: any) => any>(
   func: T,
   arg: Parameters<T>[0]
 ) => {
-  return `(${func.toString()})(${JSON.stringify(arg, undefined, 2)});`;
+  return `;(${func.toString()})(${JSON.stringify(arg, undefined, 2)});`;
 };
 
 export const registerServiceWorker = async ({
   hostList = [] as string[],
   scriptUrl = '/__vite_plugin_switch_hosts/service_worker.js',
-  // workerHash = undefined as string | undefined,
 }) => {
   if (!navigator.serviceWorker) {
     console.warn(
-      `[vite-plugin-switch-hosts] will not work, because browser not support serviceWorker`
+      `[vite-plugin-switch-hosts] nothing to do, because browser/origin not support serviceWorker`
     );
     return;
   }
@@ -20,13 +19,6 @@ export const registerServiceWorker = async ({
     const registration = await navigator.serviceWorker.register(scriptUrl, {
       scope: '/',
     });
-    // if (registration.installing) {
-    //   console.log('[vite-plugin-switch-hosts] Service worker installing');
-    // } else if (registration.waiting) {
-    //   console.log('[vite-plugin-switch-hosts] Service worker installed');
-    // } else if (registration.active) {
-    //   console.log('[vite-plugin-switch-hosts] Service worker active');
-    // }
     if (registration.active) {
       console.log('[vite-plugin-switch-hosts] service worker active');
     }
@@ -37,65 +29,46 @@ export const registerServiceWorker = async ({
     ].forEach((v) => {
       v?.postMessage(hostList);
     });
-
     window.setTimeout(async () => {
       await registration.update();
-      // if (registration.waiting && registration.active) {
-      //   console.log(`[vite-plugin-switch-hosts] Service worker need update`);
-      //   console.log(
-      //     `[vite-plugin-switch-hosts] reopen tab or enable "Update on reload" in the DevTools Application panel`
-      //   );
-      // }
     });
-
-    Object.assign(window, { registration });
-    // const oldWorkerHash = localStorage.getItem(
-    //   'vite-plugin-switch-hosts:worker_hash'
-    // );
-    // if (oldWorkerHash && workerHash && oldWorkerHash != workerHash) {
-    //   console.log(`[vite-plugin-switch-hosts] Service worker need update`);
-    //   console.log(
-    //     `[vite-plugin-switch-hosts] reopen or enable "Update on reload" in the DevTools Application panel`
-    //   );
-    // }
   } catch (error) {
     console.error(
       `[vite-plugin-switch-hosts] Registration failed with ${error}`
     );
   }
 };
+
 declare let self: ServiceWorkerGlobalScope;
 export const entryServiceWorker = ({
   proxyUrl = '/__vite_plugin_switch_hosts/proxy',
   proxyUrlKey = 'x-switch-hosts-proxy-url',
-  hostList = [] as string[],
 }) => {
+  const clientId2HostListMap: Record<string, string[] | undefined> = {};
   self.addEventListener('message', (ev) => {
-    if (
-      ev.data instanceof Array &&
-      ev.data.every((s) => typeof s == 'string')
-    ) {
+    if (ev.source instanceof WindowClient) {
       if (
-        hostList.length != ev.data.length ||
-        !hostList.every((s, i) => s == ev.data[i])
+        ev.data instanceof Array &&
+        ev.data.every((s) => typeof s == 'string')
       ) {
-        hostList = ev.data;
+        clientId2HostListMap[ev.source.id] = ev.data;
         console.log(`[vite-plugin-switch-hosts] update hosts`);
       }
     }
   });
 
   self.addEventListener('fetch', (ev) => {
+    const hostList = clientId2HostListMap[ev.clientId];
+    if (!(hostList && hostList instanceof Array && hostList.length > 0)) {
+      return;
+    }
     const { url, headers } = ev.request;
     const u = new URL(url);
     if (
-      // referrer.startsWith(location.origin) &&
       (url.startsWith('http://') || url.startsWith('https://')) &&
       !url.startsWith(location.origin) &&
       hostList.includes(u.hostname)
     ) {
-      // console.log(u.hostname, hostList);
-      // console.log(`[vite-plugin-switch-hosts] switch host ${url}`);
       const proxyHeader = new Headers(headers);
       proxyHeader.set(proxyUrlKey, url);
       /**
