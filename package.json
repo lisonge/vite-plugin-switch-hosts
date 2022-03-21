@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-switch-hosts",
-  "version": "0.0.4",
-  "description": "vite-plugin-switch-hosts",
+  "version": "0.0.5",
+  "description": "switch hosts by service worker for each origin in browser without modify system hosts file",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -38,6 +38,14 @@
   ],
   "author": "lisonge",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lisonge/vite-plugin-switch-hosts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lisonge/vite-plugin-switch-hosts/issues"
+  },
+  "homepage": "https://github.com/lisonge/vite-plugin-switch-hosts#readme",
   "dependencies": {
     "node-fetch": "2.6.7"
   },
