@@ -24,12 +24,12 @@ pnpm add -D vite-plugin-switch-hosts
 
 ## config
 
-[SwitchHostsOption](./src/index.ts#L14)
+[SwitchHostsOption](./src/index.ts#L17)
 
 ```ts
 export interface SwitchHostsOption {
   /**
-   * domain -> ip/another_domain
+   * host -> another_host
    */
   dns?: Record<string, string>;
 }

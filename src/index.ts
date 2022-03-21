@@ -16,7 +16,7 @@ import { isIpV4, isIpV6 } from './util';
  */
 export interface SwitchHostsOption {
   /**
-   * domain -> ip/another_domain
+   * host -> another_host
    */
   dns?: Record<string, string>;
 }
@@ -31,18 +31,16 @@ export default (option?: SwitchHostsOption): Plugin => {
   let command: 'build' | 'serve' = 'serve';
   const dnsRecord = option?.dns ?? {};
   const lookup: LookupFunction = async (hostname, options, callback) => {
-    const ip = dnsRecord[hostname];
-    if (typeof ip == 'string') {
-      if (isIpV4(ip)) {
-        callback(null, ip, 4);
-        return;
-      } else if (isIpV6(ip)) {
-        callback(null, ip, 6);
-        return;
-      }
+    // Because of redirection, in fact, hostname is unknown, so dnsRecord[hostname] may be undefined
+    const targetHost = dnsRecord[hostname] ?? hostname;
+    if (isIpV4(targetHost)) {
+      callback(null, targetHost, 4);
+      return;
+    } else if (isIpV6(targetHost)) {
+      callback(null, targetHost, 6);
+      return;
     }
-    // here ip is hostname, use CNAME
-    const { address, family } = await dns.lookup(ip ?? hostname);
+    const { address, family } = await dns.lookup(targetHost);
     callback(null, address, family);
   };
 
@@ -71,7 +69,7 @@ export default (option?: SwitchHostsOption): Plugin => {
       return [
         {
           tag: 'script',
-          injectTo: 'head',
+          injectTo: 'head-prepend',
           attrs: {
             src: baseURL + registerUrl,
           },
@@ -86,7 +84,7 @@ export default (option?: SwitchHostsOption): Plugin => {
             'access-control-allow-origin': '*',
             'access-control-expose-headers': '*',
             'content-type': 'text/javascript;\x20charset=utf-8',
-            'Service-Worker-Allowed': '/',
+            'service-worker-allowed': '/',
           }).forEach(([k, v]) => {
             res.setHeader(k, v);
           });
@@ -94,7 +92,6 @@ export default (option?: SwitchHostsOption): Plugin => {
             template2string(entryServiceWorker, {
               proxyUrl: baseURL + proxyUrl,
               proxyUrlKey,
-              hostList: Object.keys(dnsRecord),
             })
           );
           res.end();
@@ -141,16 +138,30 @@ export default (option?: SwitchHostsOption): Plugin => {
             res.statusCode = response.status;
             response.headers.forEach((v, k) => {
               if (
-                !['connection', 'content-length', 'content-encoding'].includes(
-                  k
-                )
+                ![
+                  'connection',
+                  'content-length',
+                  'content-encoding',
+                  'transfer-encoding',
+                  'keep-alive',
+                ].includes(k.toLowerCase())
               ) {
                 res.setHeader(k, v);
               }
             });
-            const bf = await response.buffer();
-            res.write(bf);
-            res.end();
+            response.body.on('readable', () => {
+              let chunk = null;
+              while (null !== (chunk = response.body.read())) {
+                res.write(chunk);
+              }
+            });
+            response.body.once('end', () => {
+              res.end();
+            });
+
+            // const bf = await response.buffer();
+            // res.write(bf);
+            // res.end();
             return;
           } else {
             next();
