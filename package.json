@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-switch-hosts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "vite-plugin-switch-hosts",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
