@@ -149,6 +149,9 @@ export default (option?: SwitchHostsOption): Plugin => {
                 res.setHeader(k, v);
               }
             });
+            if (response.redirected) {
+              res.setHeader('x-redirect-target-url', response.url);
+            }
             response.body.on('readable', () => {
               let chunk = null;
               while (null !== (chunk = response.body.read())) {
