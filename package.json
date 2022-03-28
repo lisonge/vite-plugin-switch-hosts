@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-switch-hosts",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "switch hosts by service worker for each origin in browser without modify system hosts file",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
