@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-switch-hosts",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "switch hosts by service worker for each origin in browser without modify system hosts file",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -69,9 +69,6 @@
     "vite": "^2.0.0"
   },
   "engines": {
-    "pnpm": "^6.0.0",
-    "yarn": "forbidden, use pnpm",
-    "npm": "forbidden, use pnpm",
-    "node": "^14.13.1 || >= 16"
+    "pnpm": "^6.0.0"
   }
 }
