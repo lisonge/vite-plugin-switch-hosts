@@ -126,7 +126,13 @@ export default (option?: SwitchHostsOption): Plugin => {
                 });
               }
             });
-            [proxyUrlKey, 'host', 'content-length'].forEach((v) => {
+            [
+              proxyUrlKey,
+              'host',
+              'content-length',
+              'cookie',
+              'authorization',
+            ].forEach((v) => {
               headers.delete(v);
             });
             const response = await fetch(rawUrl, {
@@ -144,6 +150,7 @@ export default (option?: SwitchHostsOption): Plugin => {
                   'content-encoding',
                   'transfer-encoding',
                   'keep-alive',
+                  'set-cookie',
                 ].includes(k.toLowerCase())
               ) {
                 res.setHeader(k, v);
