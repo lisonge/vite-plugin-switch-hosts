@@ -84,10 +84,12 @@ export const entryServiceWorker = ({
             u.pathname +
             u.search
         );
+      const { method, body } = ev.request;
       const req: RequestInit = {
+        method,
         headers: proxyHeader,
+        body,
       };
-      Object.assign(req, ev.request);
       ev.respondWith(fetch(realProxyUrl, req));
     }
   });
